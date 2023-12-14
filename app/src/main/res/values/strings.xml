@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PassGen</string>
+    <string name="new_password">"Add password"</string>
+</resources>
