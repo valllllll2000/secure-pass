@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -32,7 +31,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -40,6 +38,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun App(viewModel: PassViewModel) {
     val state = viewModel.passGenState.collectAsState().value
+    val context = LocalContext.current
     if (state.loading) {
         Progress()
     } else {
@@ -55,8 +54,12 @@ internal fun App(viewModel: PassViewModel) {
                     Text(text = stringResource(id = R.string.new_password))
                 }
             }
+            PassList(state = state, viewModel)
+        }
 
-            PassList(passwords = state.passwords, viewModel)
+        if (state.showToast) {
+            viewModel.onToastShown()
+            Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -76,8 +79,10 @@ fun Progress() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PassList(passwords: List<String>, viewModel: PassViewModel) {
-    val context = LocalContext.current
+private fun PassList(state: PassGenState, viewModel: PassViewModel) {
+
+    val passwords: List<String> = state.passwords
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -85,10 +90,7 @@ private fun PassList(passwords: List<String>, viewModel: PassViewModel) {
         items(passwords) { password: String ->
             Card(
                 onClick = {
-                    viewModel.addToClipBoard(password)
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-                        Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
-                    }
+                    viewModel.onCardTapped(password)
                 },
                 modifier = Modifier
                     .padding(8.dp)
@@ -97,7 +99,6 @@ private fun PassList(passwords: List<String>, viewModel: PassViewModel) {
                 ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row {
-                        //Text(text = password)
                         PasswordField(password = password)
                     }
                 }
