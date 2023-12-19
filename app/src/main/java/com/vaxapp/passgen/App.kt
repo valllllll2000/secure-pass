@@ -1,6 +1,5 @@
 package com.vaxapp.passgen
 
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -80,9 +79,8 @@ fun Progress() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PassList(state: PassGenState, viewModel: PassViewModel) {
-
     val passwords: List<String> = state.passwords
-
+    val context = LocalContext.current
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -90,7 +88,7 @@ private fun PassList(state: PassGenState, viewModel: PassViewModel) {
         items(passwords) { password: String ->
             Card(
                 onClick = {
-                    viewModel.onCardTapped(password)
+                    viewModel.onCardTapped(password, context)
                 },
                 modifier = Modifier
                     .padding(8.dp)

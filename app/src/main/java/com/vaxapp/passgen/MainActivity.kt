@@ -15,7 +15,7 @@ import com.vaxapp.passgen.ui.theme.PassGenTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel = PassViewModel(application = application)
+        val viewModel = PassViewModel()
         setContent {
             PassGenTheme {
                 // A surface container using the 'background' color from the theme
