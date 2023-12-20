@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -79,13 +80,13 @@ fun Progress() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PassList(state: PassGenState, viewModel: PassViewModel) {
-    val passwords: List<String> = state.passwords
+    val passwords: List<Password> = state.passwords
     val context = LocalContext.current
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(passwords) { password: String ->
+        items(passwords) { password: Password ->
             Card(
                 onClick = {
                     viewModel.onCardTapped(password, context)
@@ -97,7 +98,7 @@ private fun PassList(state: PassGenState, viewModel: PassViewModel) {
                 ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row {
-                        PasswordField(password = password)
+                        PasswordField(password = password, viewModel)
                     }
                 }
             }
@@ -107,11 +108,11 @@ private fun PassList(state: PassGenState, viewModel: PassViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PasswordField(password: String) {
-    var passwordVisible by rememberSaveable { mutableStateOf(false) }
-
+private fun PasswordField(password: Password, viewModel: PassViewModel) {
+    var passwordVisible by remember { mutableStateOf(password.visible) }
+    val passwordText = password.password
     TextField(
-        value = password,
+        value = passwordText,
         onValueChange = {},
         readOnly = true,
         enabled = true,
@@ -122,7 +123,7 @@ private fun PasswordField(password: String) {
             PasswordVisualTransformation()
         },
         trailingIcon = {
-            val image = if (passwordVisible) {
+            val image = if (!passwordVisible) {
                 Icons.Filled.Visibility
             } else {
                 Icons.Filled.VisibilityOff
@@ -133,7 +134,9 @@ private fun PasswordField(password: String) {
                 "Show password"
             }
 
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+            IconButton(onClick = {
+                passwordVisible = !passwordVisible
+                viewModel.updatePasswordVisibility(password) }) {
                 Icon(imageVector = image, description)
             }
         }

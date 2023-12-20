@@ -26,13 +26,13 @@ internal class PassViewModel(
         _passGenState.value =
             PassGenState(passwords, loading = true, showToast = _passGenState.value.showToast)
         viewModelScope.launch {
-            passwords.add(0, useCase.generatePassword(passwordLength))
+            passwords.add(0, Password(useCase.generatePassword(passwordLength)))
             _passGenState.value =
                 PassGenState(passwords, loading = false, showToast = _passGenState.value.showToast)
         }
     }
 
-    fun onCardTapped(password: String, application: Context) {
+    fun onCardTapped(password: Password, application: Context) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
             _passGenState.value = PassGenState(
                 _passGenState.value.passwords,
@@ -44,7 +44,7 @@ internal class PassViewModel(
         val clipboard =
             application.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
         val clip = ClipData.newPlainText(
-            "pass", password
+            "pass", password.password
         ).apply {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2)
                 description.extras = PersistableBundle().apply {
@@ -61,10 +61,25 @@ internal class PassViewModel(
             showToast = false
         )
     }
+
+    fun updatePasswordVisibility(password: Password) {
+        password.visible = !password.visible
+        val passwords = _passGenState.value.passwords
+        _passGenState.value = PassGenState(
+            passwords,
+            loading = passGenState.value.loading,
+            showToast =  passGenState.value.showToast
+        )
+    }
 }
 
 internal data class PassGenState(
-    val passwords: MutableList<String>,
+    val passwords: MutableList<Password>,
     val loading: Boolean = false,
     val showToast: Boolean = false
+)
+
+internal data class Password(
+    val password: String,
+    var visible: Boolean = false
 )
