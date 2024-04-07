@@ -1,4 +1,4 @@
-package com.vaxapp.passgen
+package com.vaxapp.passgen.usecases
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
-internal class PasswordUseCase(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+internal class CreatePasswordUseCase(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
     private val upperCaseChars: List<Char> = 'A'.rangeTo('Z').toList()
     private val lowerCaseChars: List<Char> = 'a'.rangeTo('z').toList()
@@ -14,7 +14,7 @@ internal class PasswordUseCase(private val dispatcher: CoroutineDispatcher = Dis
     private val specialChars: List<Char> = "~!@#$%^&*()_-+={[}]|:;<,>.?/".toList()
 
     @OptIn(ExperimentalStdlibApi::class)
-    internal suspend fun generatePassword(passwordLength: Int): String {
+    internal suspend operator fun invoke(passwordLength: Int): String {
         //min length passwordLength
         //min 1 uppercase
         //min 1 lowercase
@@ -29,8 +29,7 @@ internal class PasswordUseCase(private val dispatcher: CoroutineDispatcher = Dis
                     2 -> tempPass.append(specialChars.random())
                     3 -> tempPass.append(lowerCaseChars.random())
                     else -> {
-                        val which = Random.nextInt(0, 4)
-                        when (which) {
+                        when (Random.nextInt(0, 4)) {
                             0 -> tempPass.append(upperCaseChars.random())
                             1 -> tempPass.append(numbers.random())
                             2 -> tempPass.append(specialChars.random())

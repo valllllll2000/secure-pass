@@ -1,34 +1,66 @@
 package com.vaxapp.passgen
 
+import android.app.Application
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.os.PersistableBundle
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.vaxapp.passgen.repository.DatabaseRepository
+import com.vaxapp.passgen.usecases.AddPassword
+import com.vaxapp.passgen.usecases.CreatePasswordUseCase
+import com.vaxapp.passgen.usecases.GetPasswords
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
 internal class PassViewModel(
-    private val useCase: PasswordUseCase = PasswordUseCase()
-) : ViewModel() {
+    private val createPasswordUseCase: CreatePasswordUseCase = CreatePasswordUseCase(),
+    application: Application
+) : AndroidViewModel(application) {
 
     private val passwordLength = 12 //config by user
     private var _passGenState = MutableStateFlow(PassGenState(mutableListOf()))
     val passGenState = _passGenState.asStateFlow()
+    private val addPassword: AddPassword
+    private val getPasswords: GetPasswords
+
+    init {
+        val repository = DatabaseRepository(application)
+        addPassword = AddPassword(repository)
+        getPasswords = GetPasswords(repository)
+
+        _passGenState.value =
+            PassGenState(mutableListOf(), loading = true, showToast = _passGenState.value.showToast)
+        viewModelScope.launch {
+            val passwords = getPasswords.invoke()
+            _passGenState.value =
+                PassGenState(
+                    passwords.toMutableList(),
+                    loading = false,
+                    showToast = _passGenState.value.showToast
+                )
+        }
+    }
 
     fun addPassword() {
         val passwords = _passGenState.value.passwords
         _passGenState.value =
             PassGenState(passwords, loading = true, showToast = _passGenState.value.showToast)
         viewModelScope.launch {
-            passwords.add(0, Password(useCase.generatePassword(passwordLength)))
+            val password =
+                Password(System.currentTimeMillis(), createPasswordUseCase.invoke(passwordLength))
+            addPassword.invoke(password)
             _passGenState.value =
-                PassGenState(passwords, loading = false, showToast = _passGenState.value.showToast)
+                PassGenState(
+                    getPasswords.invoke().toMutableList(),
+                    loading = false,
+                    showToast = _passGenState.value.showToast
+                )
         }
     }
 
@@ -68,7 +100,7 @@ internal class PassViewModel(
         _passGenState.value = PassGenState(
             passwords,
             loading = passGenState.value.loading,
-            showToast =  passGenState.value.showToast
+            showToast = passGenState.value.showToast
         )
     }
 }
@@ -77,9 +109,4 @@ internal data class PassGenState(
     val passwords: MutableList<Password>,
     val loading: Boolean = false,
     val showToast: Boolean = false
-)
-
-internal data class Password(
-    val password: String,
-    var visible: Boolean = false
 )
