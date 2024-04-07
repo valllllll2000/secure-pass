@@ -22,10 +22,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -123,7 +120,6 @@ private fun PassList(passwords: List<Password>, viewModel: PassViewModel) {
 
 @Composable
 private fun PasswordField(password: Password, viewModel: PassViewModel) {
-    var passwordVisible by remember { mutableStateOf(password.visible) }
     val passwordText = password.password
     TextField(
         value = passwordText,
@@ -131,25 +127,24 @@ private fun PasswordField(password: Password, viewModel: PassViewModel) {
         readOnly = true,
         enabled = true,
         singleLine = true,
-        visualTransformation = if (passwordVisible) {
+        visualTransformation = if (password.visible) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
         },
         trailingIcon = {
-            val image = if (!passwordVisible) {
+            val image = if (!password.visible) {
                 Icons.Filled.Visibility
             } else {
                 Icons.Filled.VisibilityOff
             }
-            val description = if (passwordVisible) {
+            val description = if (password.visible) {
                 stringResource(R.string.image_description_hide_password)
             } else {
                 stringResource(R.string.image_description_show_password)
             }
 
             IconButton(onClick = {
-                passwordVisible = !passwordVisible
                 viewModel.updatePasswordVisibility(password)
             }) {
                 Icon(imageVector = image, description)

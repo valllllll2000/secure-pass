@@ -1,19 +1,21 @@
-package com.vaxapp.passgen.usecases
+package com.vaxapp.passgen.domain.usecases
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import kotlin.random.Random
 
-internal class CreatePasswordUseCase(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+internal class CreatePasswordUseCase @Inject constructor() {
+
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 
     private val upperCaseChars: List<Char> = 'A'.rangeTo('Z').toList()
     private val lowerCaseChars: List<Char> = 'a'.rangeTo('z').toList()
     private val numbers: List<Char> = '0'.rangeTo('9').toList()
     private val specialChars: List<Char> = "~!@#$%^&*()_-+={[}]|:;<,>.?/".toList()
 
-    @OptIn(ExperimentalStdlibApi::class)
     internal suspend operator fun invoke(passwordLength: Int): String {
         //min length passwordLength
         //min 1 uppercase

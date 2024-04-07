@@ -1,4 +1,4 @@
-package com.vaxapp.passgen.db
+package com.vaxapp.passgen.data.db
 
 import androidx.room.Dao
 import androidx.room.Delete

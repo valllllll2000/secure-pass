@@ -1,4 +1,4 @@
-package com.vaxapp.passgen.db
+package com.vaxapp.passgen.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

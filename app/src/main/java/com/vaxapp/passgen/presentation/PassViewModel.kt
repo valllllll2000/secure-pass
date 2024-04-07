@@ -1,21 +1,21 @@
 package com.vaxapp.passgen.presentation
 
-import android.app.Application
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.os.PersistableBundle
-import androidx.lifecycle.AndroidViewModel
+import android.util.Log
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vaxapp.passgen.domain.usecases.AddPassword
+import com.vaxapp.passgen.domain.usecases.CreatePasswordUseCase
+import com.vaxapp.passgen.domain.usecases.GetPasswords
+import com.vaxapp.passgen.domain.usecases.UpdatePassword
 import com.vaxapp.passgen.presentation.PassGenState.Success
 import com.vaxapp.passgen.presentation.model.Password
-import com.vaxapp.passgen.repository.DatabaseRepository
-import com.vaxapp.passgen.usecases.AddPassword
-import com.vaxapp.passgen.usecases.CreatePasswordUseCase
-import com.vaxapp.passgen.usecases.GetPasswords
-import com.vaxapp.passgen.usecases.UpdatePassword
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,33 +25,26 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
-internal class PassViewModel(
-    private val createPasswordUseCase: CreatePasswordUseCase = CreatePasswordUseCase(),
-    application: Application
-) : AndroidViewModel(application) {
+@HiltViewModel
+internal class PassViewModel @Inject constructor(
+    private val createPasswordUseCase: CreatePasswordUseCase,
+    private val addPassword: AddPassword,
+    private val updatePassword: UpdatePassword,
+    getPasswords: GetPasswords,
+) : ViewModel() {
 
     private val passwordLength = 12 //config by user
 
-    private val addPassword: AddPassword
-    private val updatePassword: UpdatePassword
-    private val getPasswords: GetPasswords
-
-    val passGenState: StateFlow<PassGenState>
-    private val _showToast = MutableStateFlow(false)
-    val showToast = _showToast.asStateFlow()
-
-    init {
-        val repository = DatabaseRepository(application)
-        addPassword = AddPassword(repository)
-        getPasswords = GetPasswords(repository)
-        updatePassword = UpdatePassword(repository)
-
-        passGenState = getPasswords.invoke().map(::Success).catch { Error(it) }.stateIn(
+    val passGenState: StateFlow<PassGenState> =
+        getPasswords.invoke().map(::Success).catch { Error(it) }.stateIn(
             viewModelScope, SharingStarted.WhileSubscribed(5000), PassGenState.Loading
         )
-    }
+
+    private val _showToast = MutableStateFlow(false)
+    val showToast = _showToast.asStateFlow()
 
     fun addPassword() {
         viewModelScope.launch {
@@ -84,14 +77,17 @@ internal class PassViewModel(
     }
 
     fun updatePasswordVisibility(password: Password) {
+
         viewModelScope.launch {
-            password.visible = !password.visible
-            updatePassword.invoke(password)
-            if (password.visible) {
+            val copy = password.copy(visible = !password.visible)
+            Log.d("PassViewModel", "will set password to: " + copy.visible)
+            updatePassword.invoke(copy)
+            if (copy.visible) {
                 delay(30000)
                 //revert back to invisible after 30s
-                password.visible = !password.visible
-                updatePassword.invoke(password)
+                copy.visible = !copy.visible
+                Log.d("PassViewModel", "will set password back to: " + password.visible)
+                updatePassword.invoke(copy)
             }
         }
     }

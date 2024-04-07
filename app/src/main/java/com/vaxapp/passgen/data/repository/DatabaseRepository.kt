@@ -1,25 +1,13 @@
-package com.vaxapp.passgen.repository
+package com.vaxapp.passgen.data.repository
 
-import android.content.Context
-import androidx.room.Room
+import com.vaxapp.passgen.data.db.PasswordDao
+import com.vaxapp.passgen.data.db.PasswordEntity
 import com.vaxapp.passgen.presentation.model.Password
-import com.vaxapp.passgen.db.AppDatabase
-import com.vaxapp.passgen.db.PasswordDao
-import com.vaxapp.passgen.db.PasswordEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-internal class DatabaseRepository(appContext: Context) {
-
-    private val passwordDao: PasswordDao
-
-    init {
-        val db = Room.databaseBuilder(
-            appContext,
-            AppDatabase::class.java, "database-name"
-        ).build()
-        passwordDao = db.passwordDao()
-    }
+internal class DatabaseRepository @Inject constructor(private val passwordDao: PasswordDao) {
 
     fun getAllPasswords(): Flow<List<Password>> {
         return passwordDao.getAll().map { items -> items.map { Password(it.id, it.password, it.isVisible) } }
