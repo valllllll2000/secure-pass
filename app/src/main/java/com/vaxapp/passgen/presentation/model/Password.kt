@@ -1,4 +1,4 @@
-package com.vaxapp.passgen
+package com.vaxapp.passgen.presentation.model
 
 internal data class Password(
     val id: Long,

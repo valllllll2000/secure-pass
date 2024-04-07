@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">PassGen</string>
     <string name="new_password">"Add password"</string>
+    <string name="toast_copied">Copied</string>
+    <string name="image_description_hide_password">Hide password</string>
+    <string name="image_description_show_password">Show password</string>
 </resources>
