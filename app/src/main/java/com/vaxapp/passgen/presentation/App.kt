@@ -2,19 +2,22 @@ package com.vaxapp.passgen.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -52,29 +55,40 @@ internal fun App(viewModel: PassViewModel) {
     }
     val showToast: Boolean = viewModel.showToast.collectAsState().value
     val context = LocalContext.current
-    when (uiState) {
-        is PassGenState.Error -> Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
-        PassGenState.Loading -> Progress()
-        is PassGenState.Success -> {
-            Column {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        onClick = { viewModel.addPassword() }, modifier = Modifier
-                            .padding(16.dp)
-                    ) {
-                        Text(text = stringResource(id = R.string.new_password))
-                    }
+    Column(Modifier.fillMaxSize()) {
+        Text(
+            text = stringResource(R.string.password_screen_title), modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        when (uiState) {
+            is PassGenState.Error -> Toast.makeText(context,
+                stringResource(R.string.loading_error), Toast.LENGTH_SHORT).show()
+            PassGenState.Loading -> Progress()
+            is PassGenState.Success -> {
+
+                Box(Modifier.fillMaxSize()) {
+                    PassList(passwords = (uiState as PassGenState.Success).passwords, viewModel)
+                    FABView(viewModel, Modifier.padding(16.dp)
+                        .align(Alignment.BottomEnd))
                 }
-                PassList(passwords = (uiState as PassGenState.Success).passwords, viewModel)
             }
         }
     }
     if (showToast) {
         viewModel.onToastShown()
         Toast.makeText(context, stringResource(R.string.toast_copied), Toast.LENGTH_SHORT).show()
+    }
+}
+
+@Composable
+private fun FABView(viewModel: PassViewModel, modifier: Modifier) {
+    FloatingActionButton(
+        onClick = { viewModel.addPassword() }, modifier = modifier) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = stringResource(id = R.string.new_password)
+        )
     }
 }
 

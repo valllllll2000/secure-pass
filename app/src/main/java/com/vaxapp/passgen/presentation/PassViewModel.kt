@@ -77,7 +77,6 @@ internal class PassViewModel @Inject constructor(
     }
 
     fun updatePasswordVisibility(password: Password) {
-
         viewModelScope.launch {
             val copy = password.copy(visible = !password.visible)
             Log.d("PassViewModel", "will set password to: " + copy.visible)
@@ -85,11 +84,10 @@ internal class PassViewModel @Inject constructor(
             if (copy.visible) {
                 delay(30000)
                 //revert back to invisible after 30s
-                copy.visible = !copy.visible
+                copy.visible = false
                 Log.d("PassViewModel", "will set password back to: " + password.visible)
                 updatePassword.invoke(copy)
             }
         }
     }
 }
-

@@ -4,4 +4,6 @@
     <string name="toast_copied">Copied</string>
     <string name="image_description_hide_password">Hide password</string>
     <string name="image_description_show_password">Show password</string>
+    <string name="loading_error">Error</string>
+    <string name="password_screen_title">Your saved passwords</string>
 </resources>
