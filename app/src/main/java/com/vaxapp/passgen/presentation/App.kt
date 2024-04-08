@@ -1,11 +1,9 @@
 package com.vaxapp.passgen.presentation
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -55,22 +53,31 @@ internal fun App(viewModel: PassViewModel) {
     }
     val showToast: Boolean = viewModel.showToast.collectAsState().value
     val context = LocalContext.current
-    Column(Modifier.fillMaxSize()) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = stringResource(R.string.password_screen_title), modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.CenterHorizontally)
         )
         when (uiState) {
-            is PassGenState.Error -> Toast.makeText(context,
-                stringResource(R.string.loading_error), Toast.LENGTH_SHORT).show()
+            is PassGenState.Error -> Toast.makeText(
+                context,
+                stringResource(R.string.loading_error), Toast.LENGTH_SHORT
+            ).show()
+
             PassGenState.Loading -> Progress()
             is PassGenState.Success -> {
-
                 Box(Modifier.fillMaxSize()) {
                     PassList(passwords = (uiState as PassGenState.Success).passwords, viewModel)
-                    FABView(viewModel, Modifier.padding(16.dp)
-                        .align(Alignment.BottomEnd))
+                    FABView(
+                        viewModel,
+                        Modifier
+                            .padding(16.dp)
+                            .align(Alignment.BottomEnd)
+                    )
                 }
             }
         }
@@ -84,7 +91,8 @@ internal fun App(viewModel: PassViewModel) {
 @Composable
 private fun FABView(viewModel: PassViewModel, modifier: Modifier) {
     FloatingActionButton(
-        onClick = { viewModel.addPassword() }, modifier = modifier) {
+        onClick = { viewModel.addPassword() }, modifier = modifier
+    ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = stringResource(id = R.string.new_password)
@@ -94,14 +102,8 @@ private fun FABView(viewModel: PassViewModel, modifier: Modifier) {
 
 @Composable
 fun Progress() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-    ) {
-        CircularProgressIndicator()
+    Box(modifier = Modifier.fillMaxSize()) {
+        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
     }
 }
 
@@ -118,7 +120,7 @@ private fun PassList(passwords: List<Password>, viewModel: PassViewModel) {
                     viewModel.onCardTapped(password, context)
                 },
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 8.dp)
                     .fillMaxWidth(0.9f),
 
                 ) {
