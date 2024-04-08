@@ -10,14 +10,20 @@ import javax.inject.Inject
 internal class DatabaseRepository @Inject constructor(private val passwordDao: PasswordDao) {
 
     fun getAllPasswords(): Flow<List<Password>> {
-        return passwordDao.getAll().map { items -> items.map { Password(it.id, it.password, it.isVisible) } }
+        return passwordDao.getAll().map { items -> items.map { toPassword(it) } }
     }
 
     suspend fun addPassword(password: Password) {
-        passwordDao.insert(PasswordEntity(password.id, password.password, password.visible))
+        passwordDao.insert(toPasswordEntity(password))
     }
 
    suspend fun updatePassword(password: Password) {
-        passwordDao.update(PasswordEntity(password.id, password.password, password.visible))
+        passwordDao.update(toPasswordEntity(password))
     }
+
+    private fun toPasswordEntity(password: Password) =
+        PasswordEntity(password.id, password.password, password.visible, password.label)
+
+    private fun toPassword(it: PasswordEntity) =
+        Password(it.id, it.password, it.isVisible, it.label)
 }

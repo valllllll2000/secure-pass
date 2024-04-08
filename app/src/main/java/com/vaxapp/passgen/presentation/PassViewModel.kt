@@ -80,14 +80,21 @@ internal class PassViewModel @Inject constructor(
         viewModelScope.launch {
             val copy = password.copy(visible = !password.visible)
             Log.d("PassViewModel", "will set password to: " + copy.visible)
-            updatePassword.invoke(copy)
+            updatePassword(copy)
             if (copy.visible) {
                 delay(30000)
                 //revert back to invisible after 30s
-                copy.visible = false
-                Log.d("PassViewModel", "will set password back to: " + password.visible)
-                updatePassword.invoke(copy)
+                val secondCopy = copy.copy(visible = false)
+                Log.d("PassViewModel", "will set password back to: " + secondCopy.visible)
+                updatePassword(secondCopy)
             }
+        }
+    }
+
+    fun updatePasswordLabel(password: Password, newLabel: String) {
+        viewModelScope.launch {
+            val copy = password.copy(label = newLabel)
+            updatePassword(copy)
         }
     }
 }
