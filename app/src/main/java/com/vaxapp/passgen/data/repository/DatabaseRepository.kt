@@ -21,9 +21,12 @@ internal class DatabaseRepository @Inject constructor(private val passwordDao: P
         passwordDao.update(toPasswordEntity(password))
     }
 
+    suspend fun deletePasswords() = passwordDao.deleteAll()
+
     private fun toPasswordEntity(password: Password) =
         PasswordEntity(password.id, password.password, password.visible, password.label)
 
     private fun toPassword(it: PasswordEntity) =
         Password(it.id, it.password, it.isVisible, it.label)
+
 }

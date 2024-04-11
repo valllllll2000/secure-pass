@@ -10,16 +10,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,12 +52,10 @@ import com.vaxapp.passgen.R
 import com.vaxapp.passgen.presentation.model.Password
 
 @Composable
-internal fun App(viewModel: PassViewModel) {
+internal fun PasswordsScreen(viewModel: PassViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val uiState by produceState<PassGenState>(
-        initialValue = PassGenState.Loading,
-        key1 = lifecycle,
-        key2 = viewModel
+        initialValue = PassGenState.Loading, key1 = lifecycle, key2 = viewModel
     ) {
         lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
             viewModel.passGenState.collect {
@@ -61,31 +65,28 @@ internal fun App(viewModel: PassViewModel) {
     }
     val showToast: Boolean = viewModel.showToast.collectAsState().value
     val context = LocalContext.current
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(R.string.password_screen_title), modifier = Modifier
-        )
-        when (uiState) {
-            is PassGenState.Error -> Toast.makeText(
-                context,
-                stringResource(R.string.loading_error), Toast.LENGTH_SHORT
-            ).show()
+    Scaffold(topBar = { TopBar(viewModel) }) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(it), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            when (uiState) {
+                is PassGenState.Error -> Toast.makeText(
+                    context, stringResource(R.string.loading_error), Toast.LENGTH_SHORT
+                ).show()
 
-            PassGenState.Loading -> Progress()
-            is PassGenState.Success -> {
-                Box(Modifier.fillMaxSize()) {
-                    PassList(passwords = (uiState as PassGenState.Success).passwords, viewModel)
-                    FABView(
-                        viewModel,
-                        Modifier
-                            .padding(16.dp)
-                            .align(Alignment.BottomEnd)
-                    )
+                PassGenState.Loading -> Progress()
+                is PassGenState.Success -> {
+                    Box(Modifier.fillMaxSize()) {
+                        PassList(passwords = (uiState as PassGenState.Success).passwords, viewModel)
+                        FABView(
+                            viewModel,
+                            Modifier
+                                .padding(16.dp)
+                                .align(Alignment.BottomEnd)
+                        )
+                    }
                 }
             }
         }
@@ -94,6 +95,24 @@ internal fun App(viewModel: PassViewModel) {
         viewModel.onToastShown()
         Toast.makeText(context, stringResource(R.string.toast_copied), Toast.LENGTH_SHORT).show()
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun TopBar(viewModel: PassViewModel) {
+    TopAppBar(title = {
+        Text(
+            text = stringResource(R.string.password_screen_title),
+        )
+    },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = FloatingActionButtonDefaults.containerColor),
+        actions = {
+            IconButton(onClick = { viewModel.deleteAll() }) {
+                Icon(
+                    imageVector = Icons.Default.Delete, contentDescription = "Delete all passwords"
+                )
+            }
+        })
 }
 
 @Composable
@@ -119,8 +138,7 @@ fun Progress() {
 private fun PassList(passwords: List<Password>, viewModel: PassViewModel) {
     val context = LocalContext.current
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         items(passwords) { password: Password ->
             Card(
@@ -168,8 +186,7 @@ private fun PasswordField(password: Password, viewModel: PassViewModel) {
         modifier = Modifier.focusRequester(focusRequester)
     )
     val passwordText = password.password
-    OutlinedTextField(
-        value = passwordText,
+    OutlinedTextField(value = passwordText,
         onValueChange = {},
         readOnly = true,
         enabled = true,
@@ -199,6 +216,5 @@ private fun PasswordField(password: Password, viewModel: PassViewModel) {
         },
         label = {
             Text(text = "Password")
-        }
-    )
+        })
 }

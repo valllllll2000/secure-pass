@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vaxapp.passgen.domain.usecases.AddPassword
 import com.vaxapp.passgen.domain.usecases.CreatePasswordUseCase
+import com.vaxapp.passgen.domain.usecases.DeletePasswords
 import com.vaxapp.passgen.domain.usecases.GetPasswords
 import com.vaxapp.passgen.domain.usecases.UpdatePassword
 import com.vaxapp.passgen.presentation.PassGenState.Success
@@ -34,6 +35,7 @@ internal class PassViewModel @Inject constructor(
     private val addPassword: AddPassword,
     private val updatePassword: UpdatePassword,
     getPasswords: GetPasswords,
+    private val deletePasswords: DeletePasswords
 ) : ViewModel() {
 
     private val passwordLength = 12 //config by user
@@ -95,6 +97,12 @@ internal class PassViewModel @Inject constructor(
         viewModelScope.launch {
             val copy = password.copy(label = newLabel)
             updatePassword(copy)
+        }
+    }
+
+    fun deleteAll() {
+        viewModelScope.launch {
+            deletePasswords.invoke()
         }
     }
 }

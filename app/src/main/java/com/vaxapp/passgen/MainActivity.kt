@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.vaxapp.passgen.presentation.App
+import com.vaxapp.passgen.presentation.PasswordsScreen
 import com.vaxapp.passgen.presentation.PassViewModel
 import com.vaxapp.passgen.ui.theme.PassGenTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    App(viewModel)
+                    PasswordsScreen(viewModel)
                 }
             }
         }

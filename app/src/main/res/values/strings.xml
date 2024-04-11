@@ -6,5 +6,4 @@
     <string name="image_description_show_password">Show password</string>
     <string name="loading_error">Error</string>
     <string name="password_screen_title">Your saved passwords</string>
-    <string name="title_activity_login">LoginActivity</string>
 </resources>
